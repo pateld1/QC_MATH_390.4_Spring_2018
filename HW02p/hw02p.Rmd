@@ -234,9 +234,15 @@ For extra credit, add an argument `k` to the `nn_algorithm_predict` function and
 #'                    0's and 1's.
 #' @param Xtest       The test data that the algorithm will predict on as a n* x p matrix.
 #' @param k           The number of neighbors required.
+#'                    Default will be square root of size of Xinput
 #' @return            The predictions as a n* length vector.
-knn_algorithm_predict = function(Xinput, y_binary, Xtest, k){
+knn_algorithm_predict = function(Xinput, y_binary, Xtest, k = NULL){
 
+  # Computes a default k if needed
+  if(is.null(k)){
+    k = round(sqrt(nrow(Xinput)))
+  }
+  
   x_points = rep(NULL, k)
   best_ys = rep(NULL, nrow(Xinput))
 
@@ -255,10 +261,6 @@ knn_algorithm_predict = function(Xinput, y_binary, Xtest, k){
     mod
   }
   
-  # Computes a default k if needed
-  if(is.null(k)){
-    k = round(sqrt(nrow(Xinput)))
-  }
   
   for(i in 1:nrow(Xtest)){
     best_euclid_dist = Inf
@@ -298,10 +300,24 @@ Note: `d` will be implemented such that it is a function of two parameters that 
 #'                    0's and 1's.
 #' @param Xtest       The test data that the algorithm will predict on as a n* x p matrix.
 #' @param k           The number of neighbors required.
+#'                    Default will be square root of size of Xinput
 #' @param d           The formula used to calculate distance between 2 points.
+#'                    Default will be the Euclidean distance 
 #' @return            The predictions as a n* length vector.
-knn_dist_algorithm_predict = function(Xinput, y_binary, Xtest, k, d){
+knn_dist_algorithm_predict = function(Xinput, y_binary, Xtest, k = NULL, d = NULL){
 
+  # Computes a default k if needed
+  if(is.null(k)){
+    k = round(sqrt(nrow(Xinput)))
+  }
+  
+  # Configures a default distance formula
+  if(is.null(d)){
+    d = function(x,y) {
+      sqrt(sum((x-y)^2))
+      }
+  }
+  
   x_points = rep(NULL, k)
   best_ys = rep(NULL, nrow(Xinput))
   
@@ -320,17 +336,6 @@ knn_dist_algorithm_predict = function(Xinput, y_binary, Xtest, k, d){
     mod
   }
   
-  # Computes a default k if needed
-  if(is.null(k)){
-    k = round(sqrt(nrow(Xinput)))
-  }
-  
-  # Configures a default distance formula
-  if(is.null(d)){
-    d = function(x,y) {
-      sqrt(sum((x-y)^2))
-      }
-    }
   
   for(i in 1:nrow(Xtest)){
     best_euclid_dist = Inf
