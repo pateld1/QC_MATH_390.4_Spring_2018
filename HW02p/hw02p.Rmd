@@ -196,7 +196,7 @@ Answer: This is the same result from the `e1071` implementation. This makes sens
 #' @return            The predictions as a n* length vector.
 nn_algorithm_predict = function(Xinput, y_binary, Xtest){
   
-  x_points = rep(NA, nrow(Xtest))
+  final_ys = rep(NA, nrow(Xtest))
   i_star = NA
   
   for(i in 1:nrow(Xtest)){
@@ -206,11 +206,11 @@ nn_algorithm_predict = function(Xinput, y_binary, Xtest){
       if(dist < best_euclid_dist){
         best_euclid_dist = dist
         i_star = i
-        x_points[i] = y_binary[i_star]
+        final_ys[i] = y_binary[i_star]
       }
     }
   }
-  x_points
+  final_ys
 }
 ```
 
@@ -225,6 +225,32 @@ expect_equal(test, y_binary)
 
 For extra credit, add an argument `k` to the `nn_algorithm_predict` function and update the implementation so it performs KNN. In the case of a tie, choose $\hat{y}$ randomly. Set the default `k` to be the square root of the size of $\mathcal{D}$ which is an empirical rule-of-thumb popularized by the "Pattern Classification" book by Duda, Hart and Stork (2007). Also, alter the documentation in the appropriate places.
 
+A mode function is first created since R does not provide us with one and we want to use it in the subsequent $2$ functions.
+Source: https://www.r-bloggers.com/computing-the-mode-in-r/
+
+```{r}
+#' This function finds the mode of a vector.
+#'
+#' @param x           The vector of values.
+#' @return            The mode of the vector (can be NULL, unimodal, bimodal or multimodal)
+mode = function(x){ 
+  ta = table(x)
+  tam = max(ta)
+  if (all(ta == tam))
+    mod = NA
+  else{
+    if(is.numeric(x)){
+      mod = as.numeric(names(ta)[ta == tam])
+    }
+    else{
+      mod = names(ta)[ta == tam]
+    }
+  }
+  mod
+}
+```
+
+Implementation of $k$ into $1NN$ algorithm:
 ```{r}
 #' This function implements the nearest neighbor algorithm as well as allow a user to define
 #' the number of neighbors required, k.
@@ -240,32 +266,19 @@ knn_algorithm_predict = function(Xinput, y_binary, Xtest, k = NULL){
 
   # Computes a default k if needed
   if(is.null(k)){
-    k = round(sqrt(nrow(Xinput)))
+    k = round(sqrt(nrow(Xinput) * ncol(Xinput)))
   }
   
-  x_points = rep(NULL, k)
-  best_ys = rep(NULL, nrow(Xinput))
-
-  # If only R provided a mode function.. 
-  # (Credit: https://www.r-bloggers.com/computing-the-mode-in-r/
-  mode = function(x){ 
-    ta = table(x)
-    tam = max(ta)
-    if (all(ta == tam))
-         mod = NA
-    else
-         if(is.numeric(x))
-    mod = as.numeric(names(ta)[ta == tam])
-    else
-         mod = names(ta)[ta == tam]
-    mod
-  }
+  # Predictions
+  final_ys = rep(NULL, nrow(Xtest))
   
+  # Stores the y values of the k neighbors
+  best_ys = rep(NULL, k)
   
   for(i in 1:nrow(Xtest)){
-    best_euclid_dist = Inf
-    distance_list = c()
     
+    distance_list = c()
+
     # Get all distances with respect to 1 point i and store in a vector
     for(j in 1:nrow(Xinput)){
       distance_list[j] = sqrt(sum((Xinput[i,]- Xtest[i,])^2))
@@ -277,13 +290,24 @@ knn_algorithm_predict = function(Xinput, y_binary, Xtest, k = NULL){
       # The which command returns the index of the minimum value in the vector
       # A 1 is placed here in the off chance we get a same min distance at 2 points
       top = which(distance_list == min(distance_list))[1] 
-      x_points[l] = y_binary[top]
+      best_ys[l] = y_binary[top]
       distance_list[top] = NULL # Change to NULL so we can get the next min value
     }
+    
     # The best y value for the x_i point will be the mode of the y_binary values collected
-    # This will NOT work if mode is NULL or more than 1 value.. 
-    best_ys[i] = y_binary[mode(x_points)]
+    # If there's no mode or 2+, choose randomly from the points selected or modes respectively
+    mode_of_ys = mode(best_ys)
+    if(is.na(mode_of_ys)){
+      final_ys[i] = sample(best_ys,1)
+    }
+    if(length(mode_of_ys) > 1){
+      final_ys[i] = sample(mode_of_ys,1)
+    }
+    else{
+      final_ys[i] = mode_of_ys
+    }
   }
+  final_ys
 }
 ```
 
@@ -291,6 +315,7 @@ For extra credit, in addition to the argument `k`, add an argument `d` represent
 
 Note: `d` will be implemented such that it is a function of two parameters that `supposively` comes from somewhere outside this function..
 
+Implementation of `d` into KNN algorithm:
 ```{r}
 #' This function implements the nearest neighbor algorithm as well as allow a user to define
 #' the number of neighbors required, k, and the distance formula to use. 
@@ -302,43 +327,30 @@ Note: `d` will be implemented such that it is a function of two parameters that 
 #' @param k           The number of neighbors required.
 #'                    Default will be square root of size of Xinput
 #' @param d           The formula used to calculate distance between 2 points.
-#'                    Default will be the Euclidean distance 
+#'                    Default will be the Euclidean distance.
 #' @return            The predictions as a n* length vector.
 knn_dist_algorithm_predict = function(Xinput, y_binary, Xtest, k = NULL, d = NULL){
 
   # Computes a default k if needed
   if(is.null(k)){
-    k = round(sqrt(nrow(Xinput)))
+    k = round(sqrt(nrow(Xinput) * ncol(Xinput)))
   }
   
   # Configures a default distance formula
   if(is.null(d)){
     d = function(x,y) {
       sqrt(sum((x-y)^2))
-      }
+    }
   }
   
-  x_points = rep(NULL, k)
-  best_ys = rep(NULL, nrow(Xinput))
+  # Predictions
+  final_ys = rep(NULL, nrow(Xtest))
   
-  # If only R provided a mode function.. 
-  # Credit: https://www.r-bloggers.com/computing-the-mode-in-r/
-  mode = function(x){ 
-    ta = table(x)
-    tam = max(ta)
-    if (all(ta == tam))
-         mod = NA
-    else
-         if(is.numeric(x))
-    mod = as.numeric(names(ta)[ta == tam])
-    else
-         mod = names(ta)[ta == tam]
-    mod
-  }
-  
+  # Stores the y values of the k neighbors
+  best_ys = rep(NULL, k)
   
   for(i in 1:nrow(Xtest)){
-    best_euclid_dist = Inf
+    
     distance_list = c()
     
     # Get all distances with respect to 1 point i and store in a vector
@@ -352,16 +364,26 @@ knn_dist_algorithm_predict = function(Xinput, y_binary, Xtest, k = NULL, d = NUL
       # The which command returns the index of the minimum value in the vector
       # A 1 is placed here in the off chance we get a same min distance at 2 points
       top = which(distance_list == min(distance_list))[1] 
-      x_points[l] = y_binary[top]
+      best_ys[l] = y_binary[top]
       distance_list[top] = NULL # Change to NULL so we can get the next min value
     }
+    
     # The best y value for the x_i point will be the mode of the y_binary values collected
-    # This will NOT work if mode is NULL or more than 1 value.. 
-    best_ys[i] = y_binary[mode(x_points)]
+    # If there's no mode or 2+, choose randomly from the points selected or modes respectively
+    mode_of_ys = mode(best_ys)
+    if(is.na(mode_of_ys)){
+      final_ys[i] = sample(best_ys,1)
+    }
+    if(length(mode_of_ys) > 1){
+      final_ys[i] = sample(mode_of_ys,1)
+    }
+    else{
+      final_ys[i] = mode_of_ys
+    }
   }
+  final_ys
 }
 ```
-
 
 5. We move on to simple linear modeling using the ordinary least squares algorithm.
 
