@@ -1,0 +1,730 @@
+---
+title: "HW03p"
+author: "Darshan Patel"
+date: "April 13, 2018"
+output: pdf_document
+---
+
+```{r setup, cache = F}
+rm(list = ls())
+if (!require("pacman")){install.packages("pacman")}
+pacman::p_load(testthat)
+knitr::opts_chunk$set(error = TRUE) #this allows errors to be printed into the PDF
+```
+
+1. Load pacakge `ggplot2` below using `pacman`.
+
+```{r}
+pacman::p_load(ggplot2)
+```
+
+The dataset `diamonds` is in the namespace now as it was loaded with the `ggplot2` package. Run the following code and write about the dataset below.
+
+```{r}
+?diamonds
+#to allow for readability of categorical variables
+diamonds$cut = factor(as.character(diamonds$cut))
+diamonds$color = factor(as.character(diamonds$color))
+diamonds$clarity = factor(as.character(diamonds$clarity))
+str(diamonds)
+```
+
+What is $n$, $p$, what do the features mean, what is the most likely response metric and why?
+
+Answer: In this dataset, there are $53,940$ samples, or $n = 53,940$. To describe these samples, there are $10$ features, or $p = 10$. The features describe the character of the diamond samples, such as carat (weight of the diamond), quality of the cut, diamond color, its dimensions and price. The most likely response metric is `price` because price is generally determined from other variables such as carat and cut. 
+
+Regardless of what you wrote above, the variable `price` will be the response variable going forward. 
+
+Use `ggplot` to look at the univariate distributions of *all* predictors. Make sure you handle categorical predictors differently from continuous predictors.
+
+```{r}
+ggplot(diamonds, aes(price)) + geom_histogram(color = "black", fill = "navyblue") +
+ggtitle("Price of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(carat)) + geom_histogram(color = "black", fill = "hotpink") +
+ggtitle("Carat of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(cut)) + geom_bar(color = "black", fill = rainbow(5)) + 
+ggtitle("Cut of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(color)) + geom_bar(color = "black", fill = rainbow(7)) + 
+ggtitle("Color of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(clarity)) + geom_bar(color = "black", fill = rainbow(8)) +
+  ggtitle("Clarity of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(x)) + geom_histogram(color = "black", fill = "chocolate") +
+ggtitle("Length of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(y)) + geom_histogram(color = "black", fill = "olivedrab") + 
+ggtitle("Width of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(z)) + geom_histogram(color = "black", fill = "tan") + 
+ggtitle("Depth of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(depth)) + geom_histogram(color = "black", fill = "magenta") + 
+ggtitle("Depth Percentage of Diamonds", subtitle = "from the Diamonds dataset")
+
+ggplot(diamonds, aes(table)) + geom_histogram(color = "black", fill = "turquoise") +
+ggtitle("Width of Top of Diamonds", subtitle = "from the Diamonds dataset")
+```
+
+Use `ggplot` to look at the bivariate distributions of the response versus *all* predictors. Make sure you handle categorical predictors differently from continuous predictors. This time employ a for loop when an logic that handles the predictor type.
+
+```{r}
+# a list of TRUES/FALSES if a column is numeric or not
+df = sapply(diamonds, is.numeric)
+
+for(i in 1:ncol(diamonds)){
+  colname = as.vector(as.matrix(diamonds[,i]))
+  variable = colnames(diamonds[,i])
+  if(typeof(colname) == "character"){
+    graphics = ggplot(diamonds, aes(x = colname, y = price)) + 
+               geom_boxplot(colour = "darkblue") + 
+               labs(x = colnames(diamonds[,i])) + 
+               ggtitle(paste("Price vs", variable), 
+                       subtitle = "from the Diamonds dataset")
+    
+  }
+  else{
+    graphics = ggplot(diamonds, aes(x = colname, y = price)) +
+               geom_point(colour = "darkred", fill = "lightgreen") + 
+               labs(x = colnames(diamonds[,i]))  + 
+               ggtitle(paste("Price vs", variable), 
+                       subtitle = "from the Diamonds dataset")
+  }
+    plot(graphics)
+}
+```
+
+Does depth appear to be mostly independent of price?
+
+Answer: Depth appears to be mostly independent of price as it does not show a consistent price at various depths or any correlation. 
+
+Look at depth vs price by predictors cut (using faceting) and color (via different colors).
+
+```{r}
+depth_price = ggplot(diamonds, aes(x = depth, y = price)) + 
+              geom_point(aes(col = color)) + 
+              ggtitle("Price vs. Depth, Cut, and Color",
+                      subtitle = "from the Diamonds dataset") + 
+              scale_color_brewer(palette = "RdBu") + 
+              facet_grid(. ~ cut)
+depth_price
+```
+
+Does diamond color appear to be independent of diamond depth?
+
+Answer: Yes.
+
+Does diamond cut appear to be independent of diamond depth?
+
+Answer: No. 
+
+Do these plots allow you to assess well if diamond cut is independent of diamond price? Yes / no
+
+Answer: No. 
+
+We never discussed in class bivariate plotting if both variables were categorical. Use the geometry "jitter" to visualize color vs clarity. visualize price using different colors. Use a small sized dot.
+
+```{r}
+color_clarity = ggplot(diamonds, aes(x = color, y = clarity, color = price)) + 
+                geom_jitter(size = 0.3) + 
+                ggtitle("Color vs. Clarity, including Price", 
+                        subtitle = "in the Diamonds dataset")
+color_clarity
+```
+
+Does diamond clarity appear to be mostly independent of diamond color?
+
+Answer: Diamond clarity appears to be mostly independent of diamond color.
+
+2. Use `lm` to run a least squares linear regression using depth to explain price. 
+
+```{r}
+depth_price = lm(diamonds$price ~ diamonds$depth)
+```
+
+What is $b$, $R^2$ and the RMSE? What was the standard error of price originally? 
+
+Respectively, $b_0$ and $b_1$ is 
+```{r}
+coef(depth_price)
+```
+The $R^2$ value is 
+```{r} 
+summary(depth_price)$r.squared
+```
+and the RMSE is 
+```{r}
+summary(depth_price)$sigma
+```
+The standard error of price originally was 
+```{r}
+sd(diamonds$price)
+```
+
+Are these metrics expected given the appropriate or relevant visualization(s) above?
+
+Answer: Given the appropriate/revelant visualizations, these metrics are expected since there is no clear correlation between depth and price and $R^2$ was calculated to be nearly $0$.
+
+Use `lm` to run a least squares linear regression using carat to explain price. 
+
+```{r}
+carat_price = lm(diamonds$price ~ diamonds$carat)
+```
+
+What is $b$, $R^2$ and the RMSE? What was the standard error of price originally? 
+
+Respectively, $b_0$ and $b_1$ is 
+```{r}
+coef(carat_price)
+```
+The $R^2$ value is 
+```{r} 
+summary(carat_price)$r.squared
+```
+and the RMSE is 
+```{r}
+summary(carat_price)$sigma
+```
+The standard error of price originally was 
+```{r}
+sd(diamonds$price)
+```
+
+Are these metrics expected given the appropriate or relevant visualization(s) above?
+
+Answer: Given the appropriate/relevants visualizations, these metrics are expected because there does seem to be some correlation between carat and price.
+
+3. Use `lm` to run a least squares anova model using color to explain price. 
+
+```{r}
+color_price = lm(diamonds$price ~ diamonds$color)
+```
+
+What is $b$, $R^2$ and the RMSE? What was the standard error of price originally? 
+
+$b$ is
+```{r}
+coef(color_price)
+```
+The $R^2$ value is 
+```{r} 
+summary(color_price)$r.squared
+```
+and the RMSE is 
+```{r}
+summary(color_price)$sigma
+```
+The standard error of price originally was 
+```{r}
+summary(color_price)$coefficients[1,2]
+```
+
+Are these metrics expected given the appropriate or relevant visualization(s) above?
+
+Answer: Given the appropriate/relevant visualizations, these metrics are expected since here does not seem to be a correlation between color and price hence a low $R^2$ value. 
+
+Our model only included one feature - why are there more than two estimates in $b$?
+
+Answer: There are more two estimates in $b$ because `color` is a categorical variable made up of $7$ colors/variables/features. 
+
+Verify that the least squares linear model fit gives the sample averages of each price given color combination. Make sure to factor in the intercept here.
+
+```{r}
+b0 = as.numeric(coef(color_price)[1])
+mean_from_lm = c(b0)
+
+for(i in 2:length(coef(color_price))){
+  mean_from_lm[i] = b0 + as.numeric(coef(color_price)[i])
+}
+
+expect_equal(mean_from_lm[1], mean(diamonds$price[diamonds$color == "D"]))
+expect_equal(mean_from_lm[2], mean(diamonds$price[diamonds$color == "E"]))
+expect_equal(mean_from_lm[3], mean(diamonds$price[diamonds$color == "F"]))
+expect_equal(mean_from_lm[4], mean(diamonds$price[diamonds$color == "G"]))
+expect_equal(mean_from_lm[5], mean(diamonds$price[diamonds$color == "H"]))
+expect_equal(mean_from_lm[6], mean(diamonds$price[diamonds$color == "I"]))
+expect_equal(mean_from_lm[7], mean(diamonds$price[diamonds$color == "J"]))
+```
+
+Fit a new model without the intercept and verify the sample averages of each colors' prices *directly* from the entries of vector $b$.
+
+```{r}
+color_price_no_intercept = lm(diamonds$price ~ 0 + diamonds$color)
+coef(color_price_no_intercept)
+
+# store the average of each colors' price into a vector and then test if 
+# the coefficients match up with the ones from the intercept-less model
+val = aggregate(diamonds$price, by = list(diamonds$color), FUN = mean)[,2]
+
+expect_equal(val, as.numeric(coef(color_price_no_intercept)))
+```
+
+What would extrapolation look like in this model? We never covered this in class explicitly.
+
+Answer: Extrapolation would look like a diamond with no color would cost $\$0$, which makes sense. A "diamond" that is "colorless" is nothing and nothing does cost $\$0$, theoretically.
+
+4. Use `lm` to run a least squares linear regression using all available features to explain diamond price. 
+
+```{r}
+all_features_price = lm(price ~ ., diamonds)
+```
+
+What is $b$, $R^2$ and the RMSE? Also - provide an approximate $95\%$ interval for predictions using the empirical rule. 
+
+$b$ is 
+```{r}
+coef(all_features_price)
+```
+
+The $R^2$ value is 
+```{r}
+summary(all_features_price)$r.squared
+```
+
+The RMSE is 
+```{r}
+summary(all_features_price)$sigma
+```
+The $95\%$ interval for predictions is 
+```{r}
+paste("±", 2*summary(all_features_price)$sigma)
+```
+
+Interpret all entries in the vector $b$.
+
+Answer: The entries in the vector $b$ gives the intercept and slope values for each predictor. With the categorical features, it is possible to understand which features give more of a boost to price. The `ideal cut` gives a price increase of $\$832$, the most from all the cut whereas the `good cut` gives the least price increase of $\$579$. The same analysis can be done with the colors. As for the numeric features, an increase of $1$ mm in the `y`, or width of a diamond, brings an increase of $\$9$ whereas an increase of $1$ mm in the `x` or `z`, or length or depth, causes a decrease of $\$1008$ and $\$50$ respectively. 
+
+Are these metrics expected given the appropriate or relevant visualization(s) above? Can you tell from the visualizations?
+
+Answer: Given the appropriate/relevant visualizations, it is impossible to make a conclusion about the metrics since the metrics are given from an analysis of all features instead of just one. The bivariate visualizations from above will not help analyze the metrics here.
+
+Comment on why $R^2$ is high. Think theoretically about diamonds and what you know about them.
+
+Answer: $R^2$ is high because diamonds prices are usually calculated per carat. Since carat is provided, it does not take much effort to create a linear model comparing the two, albeit some other features do play a smaller role. Therefore the other features give supplementary information on the price to help create a fuller explanation of the phenomenon. 
+
+Do you think you overfit? Comment on why or why not but do not do any numerical testing or coding.
+
+Answer: No overfit was done because $n >> p$. In layman terms, the sample size is much larger than the number of features therefore there is no outrageous attempt to fit through all the data points. 
+
+Create a visualization that shows the "original residuals" (i.e. the prices minus the average price) and the model residuals.
+
+```{r}
+df = data.frame(diamonds$price, 
+                diamonds$price - mean(diamonds$price),
+                all_features_price$residuals)
+ggplot(df, aes(x = df[,1], y = value, color = "variable")) + 
+  geom_point(aes(y = df[,2], col = "Original Residuals"), size = 0.4) + 
+  geom_point(aes(y = df[,3], col = "Model Residuals"), size = 0.4) + 
+  labs(x = "Price", y = "Residuals") + ggtitle("Price Residuals")
+```
+
+5. Reference your visualizations above. Does price vs. carat appear linear?
+
+Answer: Price and carat does appear to be linear. 
+
+Upgrade your model in #4 to use one polynomial term for carat.
+
+```{r}
+poly_carat_features_price = lm(price ~ poly(carat, 2, raw = TRUE) + ., diamonds)
+```
+
+What is $b$, $R^2$ and the RMSE? 
+
+$b$ is 
+```{r}
+coef(poly_carat_features_price)
+```
+
+The $R^2$ value is 
+```{r}
+summary(poly_carat_features_price)$r.squared
+```
+
+and the RMSE is 
+```{r}
+summary(poly_carat_features_price)$sigma
+```
+
+Interpret each element in $b$ just like previously. You can copy most of the text from the previous question but be careful. There is one tricky thing to explain.
+
+Answer: The entries in the vector $b$ gives the intercept and slope values for each predictor. The intercept value gives a base price of the diamond, which is $\$9807$. The intercept value gives the price of a diamond that is considered reference variable for the categorical variables, in this case which is color D, fair cut, and clarity of I1. By modifying the carat predictor to have a polynomial term, it shows that price increases by $\$16144$ when carat goes up by $1$ while also decreasing by $\$1028$ when carat squared goes up by 1.
+
+Is this an improvement over the model in $\#4$? Yes/no and why.
+
+Answer: Compared to the model in $\#4$, the $R^2$ went slighty up while the RMSE went slightly down. In my judgement, I would say this is an improvement to the model because more variance is explained by the model and smaller residuals are formed. 
+
+Define a function $g$ that makes predictions given a vector of the same features in $\mathbb{D}$.
+
+```{r}
+g = function(x){
+  
+  b = coef(poly_carat_features_price)
+  
+  yhat = b["(Intercept)"] + 
+        (x["carat"] * b["poly(carat, 2, raw = TRUE)1"]) + 
+        (x["carat"]^2 * b["poly(carat, 2, raw = TRUE)2"]) + 
+        switch(as.numeric(x["clarity"]),
+               1 , 0,
+               2 , b["claritySI2"],
+               3 , b["claritySI1"],
+               4 , b["clarityVS2"],
+               5 , b["clarityVS1"],
+               6 , b["clarityVVS2"],
+               7 , b["clarityVVS1"],
+               8 , b["clarityIF"]) +
+        switch(as.numeric(x["color"]), 
+               1 , 0,
+               2 , b["colorE"],
+               3 , b["colorF"],
+               4 , b["colorG"],
+               5 , b["colorH"],
+               6 , b["colorI"],
+               7 , b["colorJ"]) + 
+        switch(as.numeric(x["cut"]), 
+               1 , 0, 
+               2 , b["cutGood"],
+               3 , b["cutVery Good"],
+               4 , b["cutPremium"],
+               5 ,b["cutIdeal"]) + 
+        (x["x"]*b["x"]) + 
+        (x["y"]*b["y"]) + 
+        (x["z"]*b["z"]) + 
+        (x["table"]*b["table"]) + 
+        (x["depth"]*b["depth"])
+  as.numeric(yhat)
+}
+```
+
+Performing a test trial on a random row from the diamond set, we see that for a certain diamond, it predicts a price of 
+```{r}
+rand = sample(1:nrow(diamonds), 1)
+g(diamonds[rand,])
+```
+when the actual price is 
+```{r}
+as.numeric(diamonds[rand, 7])
+```
+
+6. Use `lm` to run a least squares linear regression using a polynomial of color of degree 2 to explain price.  
+
+```{r}
+color_price = lm(price ~ poly(color, 2, raw = TRUE), diamonds)
+```
+
+Why did this throw an error?
+
+Answer: This threw an error because a categorical value cannot be raised to a power. (e.g, `red` squared makes no sense). 
+
+7. Redo the model fit in #4 without using `lm` but using the matrix algebra we learned about in class. This is hard and requires many lines, but it's all in the notes.
+
+```{r}
+cat_matrix = model.matrix(diamonds$price ~ diamonds$cut +
+                            diamonds$color + 
+                            diamonds$clarity)
+
+X = cbind(diamonds[,1],cat_matrix,diamonds[,5:6], diamonds[,8:10])
+y = diamonds$price
+
+indices = sample(1 : nrow(X), 2000)
+X = as.matrix(X[indices, ])
+y = as.matrix(diamonds[indices,7])
+
+Xt = t(X) 
+XtX = Xt %*% X
+XtXinv = solve(XtX)
+b = XtXinv %*% Xt %*% y
+```
+
+What is $b$, $R^2$ and the RMSE? 
+
+$b$ is 
+```{r}
+b
+```
+
+The $R^2$ value is 
+```{r}
+yhat = X %*% b
+e = y - yhat
+Rsq = (var(y) - var(e)) / var(y)
+Rsq
+```
+
+and the RMSE is 
+```{r}
+SSE = t(e) %*% e
+MSE = 1 / (ncol(X)) * SSE
+RMSE = sqrt(MSE)
+RMSE
+```
+
+Are they the same as in #4?
+
+Answer: No. We did not use the entire $\mathcal{D}$. However, if we redo $\#4$ using the randomized $2000$ points and create a linear model from it,
+
+```{r}
+subset_diamond = data.frame(diamonds[indices,])
+subset_price = lm(price ~ .,subset_diamond)
+coef(subset_price)
+```
+
+We see that the values are roughly the same whether done via matrix algebra or linear models. 
+```{r}
+expect_equal(as.numeric(coef(subset_price)[3:24]), as.numeric(b[3:24]))
+```
+For some reason the intercept and carat coefficients are in different locations for both lists, so..
+
+```{r}
+expect_equal(as.numeric(coef(subset_price)[1]), as.numeric(b[2]))
+expect_equal(as.numeric(coef(subset_price)[2]), as.numeric(b[1]))
+```
+Still good. 
+
+Redo the model fit using matrix algebra by projecting onto an orthonormal basis for the predictor space $Q$ and the Gram-Schmidt "remainder" matrix $R$. Formulas are in the notes. Verify $b$ is the same.
+
+```{r}
+qrX = qr(X)
+Q = qr.Q(qrX)
+R = qr.R(qrX)
+
+z = t(Q) %*% y
+b_QR = solve(R) %*% z
+```
+$b$ is 
+```{r}
+b_QR
+```
+and it is the same as $b$ from before
+```{r}
+expect_equal(b_QR, b)
+```
+
+Generate the vectors $\hat{y}$, $e$ and the hat matrix $H$.
+
+```{r}
+yhat_via_Q = Q %*% t(Q) %*% y
+e = y - yhat_via_Q
+H = Q %*% t(Q)
+```
+
+In one line each, verify that 
+(a) $\hat{y}$ and $e$ sum to the vector $y$ (the prices in the original dataframe), 
+```{r}
+expect_equal(y, yhat_via_Q + e)
+```
+(b) $\hat{y}$ and $e$ are orthogonal 
+```{r}
+expect_equal(as.vector(t(yhat_via_Q) %*% e), 0, tol = 1e-1)
+```
+(c) $e$ projected onto the column space of $X$ gets annhilated, 
+```{r}
+expect_equal(sum(H %*% e), 0, tol = 1e-1)
+```
+(d) $\hat{y}$ projected onto the column space of $X$ is unaffected, 
+```{r}
+expect_equal(H %*% yhat_via_Q, yhat_via_Q)
+```
+(e) $\hat{y}$ projected onto the orthogonal complement of the column space of $X$ is annhilated
+```{r}
+expect_equal(sum((diag(nrow(X))-H) %*% yhat_via_Q), 0, tol = 1e-1)
+```
+(f) the sum of squares residuals plus the sum of squares model equal the original (total) sum of squares
+```{r}
+ybar = mean(y)
+SST = sum((y - ybar)^2)
+SSR = sum((yhat_via_Q - ybar)^2)
+SSE = sum(e^2)
+expect_equal(SST, SSR + SSE)
+```
+
+8. Fit a linear least squares model for price using all interactions and also 5-degree polynomials for all continuous predictors.
+
+```{r}
+five_deg_poly = lm(price ~ .*. 
+                   + poly(carat, 5, raw = TRUE) 
+                   + poly(depth,5,raw = TRUE) + poly(table, 5, raw = TRUE) 
+                   + poly(x, 5, raw = TRUE) + poly(y, 5, raw = TRUE)
+                   + poly(z, 5, raw = TRUE), diamonds)
+```
+
+Report $R^2$, RMSE, the standard error of the residuals ($s_e$) but you do not need to report $b$.
+
+The $R^2$ value is 
+```{r}
+summary(five_deg_poly)$r.squared
+```
+
+The RMSE is 
+```{r}
+summary(five_deg_poly)$sigma
+```
+and the standard error of the residuals is 
+```{r}
+sd(five_deg_poly$residuals)
+```
+
+Create an illustration of $y$ vs. $\hat{y}$.
+
+```{r}
+y_vs_yhat = ggplot(diamonds, aes(x = diamonds$price, 
+                                 y = predict(five_deg_poly, diamonds))) + 
+            geom_jitter(colour = "pink") + 
+            xlim(0, 20000) + 
+            ylim(0,20000) + 
+            geom_abline(slope = 1) + 
+            xlab("y") + 
+            ylab("yhat") + 
+            ggtitle("Y vs Yhat")
+y_vs_yhat
+```
+
+How many diamonds have predictions that are wrong by \$1,000 or more ?
+```{r}
+y_vs_yhat + geom_abline(intercept = -1000) + geom_abline(intercept = 1000)
+```
+
+It is a lot of diamonds, in fact, it is 
+```{r}
+differences = abs(diamonds$price - predict(five_deg_poly, diamonds))
+length(which(differences >= 1000))
+```
+diamonds. 
+
+$R^2$ now is very high and very impressive. But is RMSE impressive? Think like someone who is actually using this model to e.g. purchase diamonds.
+
+Answer: The RMSE is not impressive. Using the empirical formula, it is possible to be off by almost $\$1300$ for the price of a diamond which is not good for a diamond buyer. 
+
+What is the degrees of freedom in this model?
+
+```{r}
+length(coef(five_deg_poly))
+```
+
+Do you think $g$ is close to $h^*$ in this model? Yes / no and why?
+
+Answer: $g$ is close to $h^*$ in this model because there are more degrees of freedom.
+
+Do you think $g$ is close to $f$ in this model? Yes / no and why?
+
+Answer: $g$ is not close to $f$ in this model because $g$ does not contain all the features that can capture the true phenomenon $f$. 
+
+What more degrees of freedom can you add to this model to make $g$ closer to $f$?
+
+Answer: To make $g$ closer to $f$, more polynomial terms of varying degrees can be added to this model. 
+
+Even if you allowed for so much expressivity in $\mathcal{H}$ that $f$ was an element in it, there would still be error due to ignorance of relevant information that you haven't measured. What information do you think can help? This is not a data science question - you have to think like someone who sells diamonds.
+
+Answer: Information that can help diminish ignorance of relevant information includes: crown angle, crown depth, culet size/angle, place of purchase and authenticity. 
+
+9. Validate the model in #8 by reserving 10% of $\mathbb{D}$ as test data. Report oos standard error of the residuals
+
+```{r}
+n = nrow(diamonds)
+K = 10
+test_indices = sample(1 : n, size = (n / K))
+train_indices = setdiff(1 : n, test_indices)
+test_data = diamonds[test_indices, ]
+train_data = diamonds[train_indices, ]
+
+poly_fit_test = lm(price ~ .*. + poly(carat, 5, raw = TRUE) 
+                   + poly(depth,5,raw = TRUE) + poly(table, 5, raw = TRUE) 
+                   + poly(x, 5, raw = TRUE) + poly(y, 5, raw = TRUE)
+                   + poly(z, 5, raw = TRUE), train_data)
+
+y_hat_oos = predict(poly_fit_test, test_data)
+oos_resids = test_data$price - y_hat_oos
+sd(oos_resids)
+```
+
+Compare the oos standard error of the residuals to the standard error of the residuals you got in #8 (i.e. the in-sample estimate). Do you think there's overfitting?
+
+Answer: The oos standard error of the residuals is a bit greater than the standard error of the residuals of the in-sample estimation. However I do not think there is overfitting.
+
+Extra-credit: validate the model via cross validation.
+Note: The following block of code is time-expensive. 
+
+```{r}
+n = nrow(diamonds)
+K = 10
+size = n/K
+cv_resids = c()
+
+for(i in 1:K){
+  init = (i-1)*size + 1
+  final = i*size
+  test_indices = c(seq(init:final))
+  train_indices = setdiff(1:n, test_indices)
+  X_train = diamonds[train_indices, ]
+  X_test = diamonds[test_indices, ]
+  poly_fit_test = lm(price ~ .*. + poly(carat, 5, raw = TRUE) 
+                   + poly(depth,5,raw = TRUE) + poly(table, 5, raw = TRUE) 
+                   + poly(x, 5, raw = TRUE) + poly(y, 5, raw = TRUE)
+                   + poly(z, 5, raw = TRUE), X_train)
+  y_hat_oos = predict(poly_fit_test, X_test)
+  oos_resids = X_test$price - y_hat_oos
+  cv_resids[i] = sd(oos_resids)
+}
+cv_resids
+```
+
+Is this result much different than the single validation? And, again, is there overfitting in this model?
+
+Answer: This result is different from the one in the single validation case. There is no overfitting in this model. 
+
+10. The following code (from plec 14) produces a response that is the result of a linear model of one predictor and random $\epsilon$.
+
+```{r}
+rm(list = ls())
+set.seed(1003)
+n = 100
+beta_0 = 1
+beta_1 = 5
+xmin = 0
+xmax = 1
+x = runif(n, xmin, xmax)
+#best possible model
+h_star_x = beta_0 + beta_1 * x
+
+#actual data differs due to information we don't have
+epsilon = rnorm(n)
+y = h_star_x + epsilon
+```
+
+We then add fake predictors. For instance, here is the model with the addition of 2 fake predictors:
+
+```{r}
+p_fake = 2
+X = matrix(c(x, rnorm(n * p_fake)), ncol = 1 + p_fake)
+mod = lm(y ~ X)
+```
+
+Using a test set hold out, find the number of fake predictors where you can reliably say "I overfit". Some example code is below that you may want to use:
+
+```{r}
+p = 2
+sds = c(5)
+
+X = matrix(c(x, rnorm(n*p)), ncol = 1 + p)
+test_indices = sample(1:n, (1/10)*n)
+train_indices = setdiff(1:n, test_indices)
+
+for(i in 2:n){
+  p = p+1
+  X = matrix(c(x, rnorm(n*p)), ncol = 1 + p)
+  X_test = X[test_indices,]
+  X_train = X[train_indices,]
+  Y_test = y[test_indices]
+  Y_train = y[train_indices]
+  mod = lm(Y_train ~ X_train)
+  y_hat_oos = predict(mod, data.frame(X_test))
+  sds[i] = sd(Y_test - y_hat_oos)
+}
+```
+
+Overfit occurs when the number of fake predictors becomes 
+```{r}
+which.min(sds)+1
+```
