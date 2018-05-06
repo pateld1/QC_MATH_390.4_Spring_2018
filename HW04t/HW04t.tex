@@ -1,0 +1,542 @@
+\documentclass[12pt]{article}
+
+\include{preamble}
+\usepackage{qtree}
+
+\newtoggle{professormode}
+%\toggletrue{professormode} %STUDENTS: DELETE or COMMENT this line
+
+
+
+\title{MATH 390.4 / 650.2 Spring 2018 Homework \#4t}
+
+\author{Darshan Patel} %STUDENTS: write your name here
+
+\iftoggle{professormode}{
+\date{Due 11:59PM Monday, May 7, 2018 under the door of KY604 \\ \vspace{0.5cm} \small (this document last updated \today ~at \currenttime)}
+}
+
+\renewcommand{\abstractname}{Instructions and Philosophy}
+
+\begin{document}
+\maketitle
+
+\iftoggle{professormode}{
+\begin{abstract}
+The path to success in this class is to do many problems. Unlike other courses, exclusively doing reading(s) will not help. Coming to lecture is akin to watching workout videos; thinking about and solving problems on your own is the actual ``working out.''  Feel free to \qu{work out} with others; \textbf{I want you to work on this in groups.}
+
+Reading is still \textit{required}. For this homework set, read about all the concepts introduced in class online e.g. multivariate least squares linear modeling, orthogonal projections, non-linear linear regression, stepwise linear regression, non-parametric regression, regression trees, classification trees, performance characteristics of binary classification, etc. This is your responsibility to supplement in-class with your own readings. Also, read ch 3--6 in Silver.
+
+The problems below are color coded: \ingreen{green} problems are considered \textit{easy} and marked \qu{[easy]}; \inorange{yellow} problems are considered \textit{intermediate} and marked \qu{[harder]}, \inred{red} problems are considered \textit{difficult} and marked \qu{[difficult]} and \inpurple{purple} problems are extra credit. The \textit{easy} problems are intended to be ``giveaways'' if you went to class. Do as much as you can of the others; I expect you to at least attempt the \textit{difficult} problems. 
+
+This homework is worth 100 points but the point distribution will not be determined until after the due date. See syllabus for the policy on late homework.
+
+Up to 10 points are given as a bonus if the homework is typed using \LaTeX. Links to instaling \LaTeX~and program for compiling \LaTeX~is found on the syllabus. You are encouraged to use \url{overleaf.com}. If you are handing in homework this way, read the comments in the code; there are two lines to comment out and you should replace my name with yours and write your section. The easiest way to use overleaf is to copy the raw text from hwxx.tex \emph{and} preamble.tex into two new overleaf tex files with the same name. If you are asked to make drawings, you can take a picture of your handwritten drawing and insert them as figures or leave space using the \qu{$\backslash$vspace} command and draw them in after printing or attach them stapled.
+
+The document is available with spaces for you to write your answers. If not using \LaTeX, print this document and write in your answers. I do not accept homeworks which are \textit{not} on this printout. Keep this first page printed for your records.
+
+\end{abstract}
+
+\thispagestyle{empty}
+\vspace{1cm}
+NAME: \line(1,0){380}
+\clearpage
+}
+
+\problem{These are questions about Silver's book, chapters ...  For all parts in this question, answer using notation from class (i.e. $t ,f, g, h^*, \delta, \epsilon, e, t, z_1, \ldots, z_t, \mathbb{D}, \mathcal{H}, \mathcal{A}, \mathcal{X}, \mathcal{Y}, X, y, n, p, x_{\cdot 1}, \ldots, x_{\cdot p}$, $x_{1 \cdot}, \ldots, x_{n \cdot}$, etc. and also we now have $f_{pr}, h^*_{pr}, g_{pr}, p_{th}$, etc from probabilistic classification as well as different types of validation schemes). }
+
+\begin{enumerate}
+
+\easysubproblem{What algorithm that we studied in class is PECOTA most similar to?}\spc{1} \\ PECOTA is most similar to $k$- nearest neighbors.
+
+\easysubproblem{Is baseball performance as a function of age a linear model? Discuss.}\spc{2} \\ Baseball performance as a function of age is not a linear model because peak performance doesn't change linearly with increasing age. 
+
+\intermediatesubproblem{How can baseball scouts do better than a prediction system like PECOTA?}\spc{4} \\ Baseball scouts can do better than a prediction system like PECOTA using a variety of skills. A pitcher can get many strikeouts by finding the strike zone and mixing up the pitches. Another way for analyzing player's potential is to have them do several tests on the field such as running and see how it plays out. 
+
+\intermediatesubproblem{Why hasn't anyone (at the time of the writing of Silver's book) taken advantage of Pitch f/x data to predict future success?}\spc{4} \\
+No one took advantage of Pitch f/x data to predict future success because no one knew how to make use of the data coming from Pitch f/x. People thought it may shift emphasis onto things that are harder to quantify and where the information is more exclusive. 
+
+\hardsubproblem{Chapter 4 is all about predicting weather. Broadly speaking, what is the problem with weather predictions? Make sure you use the framework and notation from class. This is not an easy question and we will discuss in class. Do your best.}\spc{6} \\ The problem with weather predictions is that they are not accurate. Various factors, or $x$s, can change weather outcome for even in a small area. To predict weather, data has to be collected from multiple dimensions, or features, or $z$s, to create a full image. Another reason that weather is a dynamic system. It needs precise data to create predictions and sometimes data come truncated, since we cannot measure temperature and pressure to many decimal points.Even being off by 3 or 4 decimal places can throw off forecasts. 
+
+\easysubproblem{Why does the weatherman lie about the chance of rain? And where should you go if you want honest forecasts?}\spc{2} \\
+The weatherman lies about the chance of rain so that the viewer sees value in the perception of accuracy of weather predictions by for-profit weather forecasters. If a pro-profit forecaster said $50\%$ chance of rain, it would seem wishy-washy and indecisive to people watching the forecast. 
+
+\hardsubproblem{Chapter 5 is all about predicting earthquakes. Broadly speaking, what is the problem with earthquake predictions? It is \textit{not} the same as the problem of predicting weather. Read page 162 a few times. Make sure you use the framework and notation from class.}\spc{6} \\ 
+The problem with earthquake predictions is that it's done using information from past earthquakes which has a lot of noise, $\epsilon$. From this, the models tend to overfit and thus create bad performance in the real world. 
+
+\easysubproblem{Silver has quite a whimsical explanation of overfitting on page 163 but it is really educational! What is the nonsense predictor in the model he describes?}\spc{2} \\ The nonsense predictor in the model Silver describes is color, which corresponds to a specific lock combination. 
+
+\easysubproblem{John von Neumann was credited with saying that \qu{with four parameters I can fit an elephant and with five I can make him wiggle his trunk}. What did he mean by that and what is the message to you, the budding data scientist? }\spc{5} \\ With four parameters, Neumann can create a model that will not overfit data points (of an elephant). With the addition of one more parameter, he can fine tune the parameters to give it a closer fit to the data. Although that would be nice, it cause overfitting and the elephant's trunk can lie anywhere in a small area. 
+
+\hardsubproblem{Chapter 6 is all about predicting unemployment, an index of macroeconomic performance of a country. Broadly speaking, what is the problem with unemployment predictions? It is \textit{not} the same as the problem of predicting weather or earthquakes. Make sure you use the framework and notation from class.}\spc{6} \\ The problem with unemployment predictions is that there are three challenges to overcome when making economic forecasts. It is hard to determine cause and effect from economic statistics alone. The economy is always changing so explanations of economic behavior that hold in one business cycle may not apply to future ones. Lastly, the data that economists work with isn't the best either. 
+
+\extracreditsubproblem{Many times in this chapter Silver says something on the order of \qu{you need to have theories about how things function in order to make good predictions.} Do you agree? Discuss.}\spc{4} \\ Theory of how things function is important to have to make good predictions because it can allow for some accuracy. If you know what patterns can lead to rain, or a decrease in unemployment, then it will be easier for you to predict them. 
+
+\end{enumerate}
+
+
+\problem{This question is about validation for the supervised learning problem with one fixed $\mathbb{D}$.}
+
+
+\begin{enumerate}
+
+\easysubproblem{For one fixed $\mathcal{H}$ and $\mathcal{A}$ (i.e. one model), write below the steps to do a simple validation and include the final step which is shipping the final $g$.}\spc{6} \begin{enumerate} 
+\item Divide $\mathcal{D}$ into two parts: $\mathcal{D}_{\text{train}}$ and $\mathcal{D}_{\text{test}}$. 
+\item Create the model $g$ from $\mathcal{H}$ on $\mathcal{D}_{\text{train}}$. 
+\item Validate the model on $\mathcal{D}_{\text{test}}$ and calculate out of sample error. 
+\item Ship the model $g$ as well as the out of sample error. \end{enumerate} 
+
+\easysubproblem{For one fixed $\mathcal{H}$ and $\mathcal{A}$ (i.e. one model), write below the steps to do a $K$-fold cross validation and include the final step which is shipping the final $g$.}\spc{10} \begin{enumerate} 
+\item Divide $\mathcal{D}$ into $\mathcal{D}_{\text{test}}$ and $\mathcal{D}_{\text{train}}$ where $\frac{1}{k}$ of $\mathcal{D}$ is in $\mathcal{D}_{\text{test}}$. 
+\item Fit $g_k = \mathcal{A}(\mathcal{H}, \mathcal{D}_{\text{train}, k})$.
+\item Calculate $\vec{\hat{y}} = g_{VC}(x_{\text{test}, k})$. 
+\item Repeat 2-3 for $1-K$ folds.
+\item Concat vertically $\vec{\hat{y}} = \begin{bmatrix} \vec{\hat{y}}_1 \\ \vdots \\ \vec{\hat{y}}_k \end{bmatrix} $.
+\item Compute $oose = \text{error}(\vec{y}, \vec{\hat{y}_{cv}})$ where $\vec{y}$ is the full $y$ since each observation is represented across the $k$ folds.
+\item Ship $g_k$ and the out of sample error $oose$. \end{enumerate} 
+
+\intermediatesubproblem{For one fixed $\mathcal{H}$ and $\mathcal{A}$ (i.e. one model), write below the steps to do a bootstrap validation and include the final step which is shipping the final $g$.}\spc{10} 
+\begin{enumerate} 
+\item Divide $\mathcal{D}$ into $\mathcal{D}_{\text{train}}$, $\mathcal{D}_{\text{test}}$ and $\mathcal{D}_{\text{select}}$ where $\frac{1}{k}$ of $\mathcal{D}$ goes into $\mathcal{D}_{\text{test}}$ and $\mathcal{D}_{\text{select}}$. 
+\item For $g_{j, k_i, k_0} = \mathcal{A}(\mathcal{H}, \mathcal{D}_{\text{train}, k_i, k_0})$.
+\item Compute $\hat{y}_{j, k_i, k_0} = g_{j, k_i, k_0}(\mathcal{D}_{\text{select}, k_i, k_o})$.
+\item Repeat steps 2-3 for all models $j \in \set{1,\dots,M}$.
+\item Repeat steps 2-3 for all inner folds $k_i \in \set{1,\dots,5}$.
+\item Concat $\vec{\hat{y}}_{j, k_0} = \begin{bmatrix} \vec{\hat{y}}_{j, 1, k_0} \\ \vdots \\ \vec{\hat{y}}_{j, 5, k_o} \end{bmatrix}$. 
+\item Select the best model $j^*_{k_0} = \argmin {oose_{j, k_0}}$. 
+\item Repeat steps 2-7 for $k_0 = \set{1,\dots, 5}$. 
+\item Get $\vec{\hat{y}} = \begin{bmatrix} \vec{y}_{j^*_1} \\ \vdots \\ \vec{y}_{j^*_5} \end{bmatrix} $. 
+\item Estimate $oose = \text{error}(\vec{\hat{y}}, \vec{y})$. 
+\item Repeat steps 2-7 to build final model $g$ without $\mathcal{D}_{\text{test}}$. 
+\item Ship $g$ and out of sample error $oose$. 
+\end{enumerate}
+
+\intermediatesubproblem{For one fixed $\mathcal{H}_1, \ldots \mathcal{H}_M$ and $\mathcal{A}$ (i.e. $M$ different models), write below the steps to do a simple validation and include the final step which is shipping the final $g$.}\spc{22} 
+\begin{enumerate}
+\item Divide $\mathcal{D}$ into $\mathcal{D}_{\text{train}}$ and $\mathcal{D}_{\text{test}}$ where $\frac{1}{k}$ of $\mathcal{D}$ is in $\mathcal{D}_{\text{test}}$. 
+ \item For each model $j \in \set{1,\dots,M}$, build $g_j = \mathcal{A}_j(\mathcal{H}_j, \mathcal{D}_{\text{train}})$. 
+ \item Get error $oose_j = \text{error}(y_{\text{select}}, g_j(x_{\text{select}}))$ (usually $s_e$). 
+ \item Repeat steps 2-3 for $M$ models
+ \item Select $j^* = \argmin{} \set{oose_1, \dots, oose_M}$. 
+ \item Compute $oose_{j^*} = \text{error}(y_{\text{test}}, g_{j^*}(x_{\text{test}}))$. This is the estimate of future performance. 
+ \item Repeat steps 2-5 on $\mathcal{D}$ to produce $g_{\text{final}}$. 
+ \item Ship $g_{\text{final}}$ and $oose_{j^*}$. 
+ \end{enumerate} 
+
+\hardsubproblem{For one fixed $\mathcal{H}_1, \ldots \mathcal{H}_M$ and $\mathcal{A}$ (i.e. $M$ different models), write below the steps to do a $K$-fold cross validation and include the final step which is shipping the final $g$. This is not an easy problem! There are a lot of steps and a lot to keep track of.}\spc{22} 
+
+\begin{enumerate} 
+\item Divide $\mathcal{D}$ into $k$ folds, where $\mathcal{D}_{\text{test}}$ gets the first piece and $\mathcal{D}_{\text{train}}$ gets the rest.
+\item Fit $g_{k,m} = \mathcal{A}(\mathcal{H}, \mathcal{D}_{\text{train}, k})$.
+\item Calculate $\vec{\hat{y}} = g_{cv}(x_{\text{test}, k})$. 
+\item Repeat 2-3 for $1-K$ folds.
+\item Concat vertically $\vec{\hat{y}} = \begin{bmatrix} \vec{\hat{y}}_1 \\ \vdots \\ \vec{\hat{y}}_k \end{bmatrix} $.
+\item Repeat 2-4 for $1-M$ models, where each model's $\vec{\hat{y}}$ go on its own column. 
+\item Compute $oose = \text{error}(\vec{y}, \vec{\hat{y}_{cv}})$ where $\vec{y}$ is the full $y$ since each observation is represented across the $k$ folds.
+\item Ship $g_k$ and the out of sample error $oose$. \end{enumerate} 
+
+\end{enumerate}
+
+
+\problem{This question is about ridge regression --- an alternative to OLS.}
+
+
+\begin{enumerate}
+
+\intermediatesubproblem{Imagine we are in the \qu{Luis situation} where we have $\X$ with dimension $n \times (p+1)$ but $p+1 > n$ and we still want to do OLS. Why would the OLS solution we found previously break down in this case?}\spc{4} \\ The OLS solution would break down because there are more features being measured, to estimate the phenomenon, then the size of the dataset. When this happens, there are more unknown variables than equations and so there will be infinite solutions to the OLS algorithm.
+
+\intermediatesubproblem{We will embark now to provide a solution for this case. The solution will also give nice results for other situations besides the Luis situation as well. First, assume $\lambda$ is a positive constant and demonstrate that the expression $\lambda \normsq{\w} = \w^\top (\lambda \I) \w$ i.e. it can be expressed as a quadratic form where $\lambda\I$ is the determining matrix. We will call this term $\lambda \normsq{\w}$ the \qu{ridge penalty}.}\spc{3} 
+$$ \begin{aligned} \lambda \normsq{\w} &= \lambda \cdot  \sum w_i^2 \\ &= \lambda \cdot \begin{bmatrix} w_1 & w_2 & \dots & w_n \end{bmatrix} \begin{bmatrix} w_1 \\ w_2 \\ \vdots \\ w_n \end{bmatrix} \\ &= \begin{bmatrix} \lambda w_1 & \lambda w_2 & \dots & \lambda w_n \end{bmatrix} \begin{bmatrix} w_1 \\ w_2 \\ \vdots \\ w_n \end{bmatrix} \\ &= \begin{bmatrix} w_1 & w_2 & \dots & w_n \end{bmatrix} \begin{bmatrix} \lambda w_1 \\ \lambda w_2 \\ \vdots \\ \lambda w_n \end{bmatrix} \\ &= \begin{bmatrix} w_1 & w_2 & \dots & w_n \end{bmatrix} (\lambda  \I) \begin{bmatrix} w_1 \\ w_2 \\ \vdots \\ w_n \end{bmatrix} \\ &= \w^\top (\lambda \I) \w \end{aligned} $$ 
+
+\easysubproblem{Write the $\mathcal{H}$ for OLS below where the parameter is the $\w$ vector. $\w \in$ ?}\spc{1} 
+$$ \mathcal{H} = \set{ \w \cdot \x: \w \in \mathbb{R}^{p+1}} $$ 
+
+\easysubproblem{Write the error objective function that OLS minimizes using vectors, then expand the terms similar to the previous homework assignment.}\spc{1}
+$$ \begin{aligned} SSE &= (\y - \hat{\y})^\top(\y - \hat{\y}) \\ &= (\y - \w \cdot \X)^\top (\y - \w \cdot \X) \\ &= \y^\top\y - \X^\top\w^\top\y - \y^\top\X\w + \w^\top\X^\top\X\w \end{aligned} $$ 
+
+\easysubproblem{Now add the ridge penalty $\lambda \normsq{\w}$ to the expanded form you just found and write it below. We will term this two-part error function the \qu{ridge objective}.}\spc{1}
+$$ \begin{aligned} SSE &= \y^\top\y - \X^\top\w^\top\y - \y^\top\X\w + \w^\top\X^\top\X\w + \lambda\w^\top\w \\ &= \y^\top\y - 2\w^\top\X^\top\y + \w^\top(\X^\top\x + \lambda \I)\w \end{aligned} $$ 
+
+\easysubproblem{Note that the ridge objective looks a bit like the hinge loss we spoke about when we were learning about support vector machines. There are two pieces of this error function in counterbalance. When this is minimized, describe conceptually what is going on.}\spc{5} \\
+When this is being minimized, the amount of deviation from the true phenomenon is minimized. The second part of this error function prevents overfitting by minimizing the size of $\w$. 
+
+\intermediatesubproblem{Now, the ridge penalty term as a quadratic form can be combined with the last term in the least squares error from OLS. Do this, then use the rules of vector derivatives we learned to take $d/d\w$ and write the answer below.}\spc{2}
+$$ \frac{\partial}{\partial \w} SSE = -2\X^\top\y + 2(\X^\top\X + \lambda \I)\w $$ 
+
+\easysubproblem{Now set that derivative equal to zero. What matrix needs to be invertible to solve?}\spc{2}
+$$ \begin{aligned} SSE &= -2\X^\top\y + 2(\X^\top\X + \lambda \I)\w \stackrel{\text{set}}{=} 0 \\ 2(\X^\top\X + \lambda \I)\w &= 2\X^\top\y \end{aligned} $$ 
+The matrix $\X^\top\X + \lambda \I$ needs to be invertible. 
+
+\hardsubproblem{There's a theorem that says \textit{positive definite} matrices are invertible. A matrix is said to be positive definite if every quadratic form is positive for all vectors i.e. if $\forall \z \neq \zerovec~~ \z^\top A \z > 0$ then $A$ is positive definite. Prove this matrix from the previous question is positive definite.}\spc{5} \\ 
+The quadratic form of the above matrix is $$ \z^\top (\X^\top\X + \lambda \I)\z $$ 
+This simplifies to $$ \z^\top\X^\top\X\z + \z^\top\lambda \I\z $$ Note that $\X^\top\X = \sum x_i^2$, which is always positive, and so $\z^\top \X^\top \X\z$ is positive. Now we assumed that $\lambda$ is a positive constant, therefore $\z^\top \lambda \I \z$ is also positive. Thus $\z^\top(\X^\top \X + \lambda \I)\z$ is positive and so $\X^\top\X + \lambda \I$ is positive definite. 
+
+\easysubproblem{Now that it's positive definite (and thus invertible), solve for the $\w$ that is the argmin of the ridge objective, call it $\b_{ridge}$. Note that this is called the \qu{ridge estimator} and computing it is called \qu{ridge regression} and it was invented by Hoerl and Kennard in 1970.}\spc{3} 
+$$\text{ridge estimator} = \b_{\text{ridge}} = \w =  (\X^\top\X + \lambda \I)^{-1}\X^\top\y $$ 
+
+
+\easysubproblem{Did we just figure out a way out of Luis's situation? Explain.}\spc{3} 
+\\ By adding the ridge penalty, we were able to figure out a way out of Luis's situation by not letting the model overfit through ridge regression. 
+
+\intermediatesubproblem{It turns out in the Luis situation, many of the values of the entries of $\b_{\text{ridge}}$ are close to $0$. Why should that be? Can you explain now conceptually how ridge regression works?}\spc{3} \\
+Many of the values of the entries of $\b_{\text{ridge}}$ are close to $0$ because the purpose of tacking on the ridge penalty was to limit the size of the $\w$. Ridge regression controlled the size of the constants. 
+
+\easysubproblem{Find $\yhat$ as a function of $\y$ using $\b_{\text{ridge}}$. Is $\yhat$ an orthogonal projection of $\y$ onto the column space of $\X$?}\spc{3} 
+$$\yhat = X\b_{\text{ridge}}$$ $\yhat$ is an orthogonal projection of $\y$ onto the column space of $\X$. 
+
+\extracreditsubproblem{Show that this $\yhat$ is an orthogonal projection of $\y$ onto the column space of some matrix $\X_{ridge}$ (which is not $\X$!) and explain how to construct $\X_{ridge}$ on a separate page.}\spc{0} %to do maybe 
+
+\easysubproblem{Is the $\mathcal{H}$ for OLS the same as the $\mathcal{H}$ for ridge regression? \fbox{Yes}/no. \\ Is the $\mathcal{A}$ for OLS the same as the $\mathcal{A}$ for ridge regression? Yes/\fbox{no}.}\spc{-0.5}
+
+\intermediatesubproblem{What is a good way to pick the value of $\lambda$, the hyperparameter of the $\mathcal{A}$ = ridge?}\spc{1} \\
+Attempt model selection protocol where each model runs on $\mathcal{D}_{\text{train}}$ and uses a different value of $\lambda$. Then examine which $\lambda$ allows the smallest oose on $\mathcal{D}_{\text{test}}$. Cross validation is also another good method. 
+
+\easysubproblem{In classification via $\mathcal{A}$ = support vector machines with hinge loss, how should we pick the value of $\lambda$? Hint: same as previous question!}\spc{1} \\ 
+Attempt model selection protocol where each model runs on $\mathcal{D}_{\text{train}}$ and uses a different value of $\lambda$. Then examine which $\lambda$ allows the smallest oose on $\mathcal{D}_{\text{test}}$. Cross validation is also another good method. 
+
+\extracreditsubproblem{Besides the Luis situation, in what other situations will ridge regression save the day?}\spc{3} \\
+Ridge regression will also help when working with bad outliers in a dataset. 
+
+\hardsubproblem{The ridge penalty is beautiful because you were able to take the derivative and get an analytical solution. Consider the following algorithm:
+
+\beqn
+\b_{\text{lasso}} = \argmin_{\w~\in~\reals^{p + 1}} \braces{(\y - \X\w)^\top(\y - \X\w) + \lambda \norm{\w}^1}
+\eeqn
+
+This penalty is called the \qu{lasso penalty} and it is different from the ridge penalty in that it is not the norm of $\w$ squared but just the norm of $\w$. It turns out this algorithm (even though it has no closed form analytic solution and must be solved numerically a la the SVM) is very useful! In \qu{lasso regression} the values of $\b_{\text{lasso}}$ are not shrunk \textit{towards} 0 they are harshly punished \textit{directly to} $0$! How do you think lasso regression would be useful in data science? Feel free to look at the Internet and write a few sentences below.}~\spc{6} \\
+Lasso regression will be useful to get rid of predictors that cause prediction errors. If $\b_{\text{lasso}, i}$ is $0$ for a certain $x$, then the predictor will not be used to create the model. By doing so, more 	\qu{important} predictors that play a bigger role in determining $y$ will be looked at to create the model. 
+
+\easysubproblem{Is the $\mathcal{H}$ for OLS the same as the $\mathcal{H}$ for lasso regression? \fbox{Yes}/no. \\ Is the $\mathcal{A}$ for OLS the same as the $\mathcal{A}$ for lasso regression? \fbox{Yes}/no.}\spc{-0.5}
+
+\end{enumerate}
+
+\problem{These are questions about non-parametric regression.}
+
+
+\begin{enumerate}
+
+\easysubproblem{In problem 1, we talked about schemes to validate algorithms which tried $M$ different prespecified models. Where did these models come from?}\spc{4} \\ These models came from parametric regressions of varying degrees and interaction terms. 
+
+\intermediatesubproblem{What is the weakness in using $M$ pre-specified models?}\spc{5} \\ The weakness in using $M$ pre-specified models is that it is given a certain idea of how a phenomenon is determined. What this means is that a specific $\mathcal{H}$ is fed into the algorithm to produce $M$ pre-specified models. It does not allow for interpretations to be made as the model is being made. 
+
+\hardsubproblem{Explain the steps clearly in forward stepwise linear regression.}\spc{6} \\ On $\mathcal{D}_{\text{train}}$, create a model using $\mathcal{H} = \set{w_0: w_0 \in \mathbb{R}}$ and test it on $\mathcal{D}_{\text{select}}$. Then add a term that depends on a single $x$, forming $\mathcal{H} = \set{w_0 + w_1x: \w \in \mathbb{R}^2}$. Create a model using this $\mathcal{H}$ and then test on $\mathcal{D}_{\text{select}}$. Continue adding terms until there is overfit in $\mathcal{D}_{\text{select}}$. 
+
+\hardsubproblem{Explain the steps clearly in \emph{backwards} stepwise linear regression.}\spc{7} \\
+Start with a $\mathcal{H}$ of many linear terms. Create a model using $\mathcal{H}$ on $\mathcal{D}_{\text{test}}$ and test it on $\mathcal{D}_{\text{select}}$. Remove a term from $\mathcal{H}$ and create the model on $\mathcal{D}_{\text{train}}$ again. Test it on $\mathcal{D}_{\text{select}}$. Continue removing term until there is underfit in $\mathcal{D}_{\text{select}}$. 
+
+\intermediatesubproblem{What is the weakness(es) in this stepwise procedure?}\spc{4} \\ The weaknesses in the stepwise procedure is that you still need an intelligent collection of predictions to choose from at each position and you cannot be sure you are specifying it. Furthermore, the model will still be linear, perhaps nonlinear models can work better. 
+
+\easysubproblem{Define \qu{non-parametric regression}. What problem(s) does it solve? What are its goals? Discuss.}\spc{7} \\
+Non-parametric regression is regression using a $\mathcal{H}$ that can adjust flexibly and allow for complexity as the size of the data increases. Non-parametric regression models do not take a pre-specified form, thus solving the problem of nonadjustable $\mathcal{H}$. In addition, it constrains itself to information in the data, meaning it uses the data to make estimates. The goal of non-parametric regression is to estimate a phenomenon using only its data which provides the model space. 
+
+\intermediatesubproblem{Provide the steps for the regression tree (the one algorithm we discussed in class) below.}\spc{10}
+\begin{enumerate} 
+\item Begin with all training data $X,Y$. 
+\item For every possible split at the current node, divide into $X_L, \vec{y}_L$ and $X_R, \vec{y}_R$ and calculate $$SSE_L = \sum (Y_L - \bar{Y}_L)^2 ~~~ SSE_R = \sum (Y_R - \bar{Y}_R)^2 $$ where the summation is done over number of data points in the split. 
+\item Find the split with the lowest total SSE 
+$$SSE_{tot} = SSE_L + SSE_R $$ 
+\item Create the split by splitting data into two nodes. 
+\item Repeat steps 2-4 until ``STOP." \end{enumerate} 
+Note: STOP is when mode has less than $N_0$ data points inside. \newpage
+
+\easysubproblem{Consider the following data 
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=3in]{1curvy}
+\end{figure}
+
+Create a tree with maximum depth 1 (i.e one split at the root node) and plot $g$ above.}~\spc{4}
+
+
+\easysubproblem{Now add a second split to the tree and plot $g$ below.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=3in]{2curvy}
+\end{figure}
+
+}~\spc{-0.5}
+
+\newpage
+
+\easysubproblem{Now add a third split to the tree and plot $g$ below.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=3in]{3curvy}
+\end{figure}
+
+}~\spc{5}
+
+
+\easysubproblem{Now add a fourth split to the tree and plot $g$ below.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=3in]{4curvy}
+\end{figure}
+
+}~\spc{-0.5} \newpage
+
+\easysubproblem{Draw a tree diagram of $g$ below indicating which nodes are the root, inner nodes and leaves. Indicate split rules and leaf values clearly.}
+$$ \Tree[ .{$x < -0.20$} [.{$x< -1.15$} [.{$x < -2.10$} {$\bf 14.3$} {$\bf 9.2$} ] {$\bf 4.9$} ] [.{$x < 1.77$} {$\bf 2.4$} {$\bf 4.0$} ] ] $$
+
+\easysubproblem{Plot $g$ below for the mature tree with the default $N_0 =$ \texttt{nodesize} hyperparameter.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=3in]{defaultn0}
+\end{figure}
+
+}~\spc{-0.5}
+
+
+\easysubproblem{If $N_0 =1$, what would likely go wrong?}\spc{2} \\
+If $N_0 = 1$, there will be overfitting. 
+
+\easysubproblem{How should you pick the $N_0 =$ \texttt{nodesize} hyperparameter in practice?}\spc{2} \\
+Create several models using a variety of $N_0$ and training on $\mathcal{D}_{\text{train}}$. Then test the model using $\mathcal{D}_{\text{test}}$ and calculate a out of sample error. Repeat this for all models and see which model's $N_0$ value created the smallest out of sample error. 
+
+
+\end{enumerate} \newpage
+
+
+\problem{These are questions about classification trees.}
+
+
+\begin{enumerate}
+
+\easysubproblem{How are classification trees different than regression trees?}\spc{2}
+\\ Classification trees and regression trees predict different types of phenomenon. Classification trees can predict a discrete $y \in \set{1,\dots,K}$, where $y$ can be categorical, whereas a regression tree is trying to find predict a $y \subseteq \mathbb{R}$. 
+
+\intermediatesubproblem{What are the steps in the classification tree algorithm?}\spc{12}
+\begin{enumerate} 
+\item Begin with all training data. 
+\item For every possible split, calculate the Gini impurity metrics $$ \begin{aligned} \text{Gini}_L &= \sum_{i=1}^k \hat{p}_L(1 - \hat{p}_L) \\ \text{Gini}_R &= \sum_{i=1}^k \hat{p}_R(1 - \hat{p}_R) \end{aligned} $$ where $$ \hat{p}_i = \frac{\text{number of $y_i$ in category i}}{n\text{ number in node}} $$ 
+\item Find the split with the lowest weighted average of Gini impurity metric $$ \text{Gini}_{avg} = \frac{n_L \text{Gini}_L + n_R \text{Gini}_R}{n_L + n_R} $$ 
+\item Create the split and split the data in the node correctly along the two new daughter nodes. 
+\item Repeat steps $2-4$ and ``stop" where node has $\leq N_0$ data points. (Default is $N_0 = 1$.)
+\item For all leaf nodes, assign $\hat{y} = \text{Mode}[\vec{y}_0]$ where $\hat{y}_0$ is the average of the $y_i$'s in the leaf node. \end{enumerate} 
+
+
+\end{enumerate}
+
+\problem{These are questions about measuring performance of a classifier.}
+
+\begin{enumerate}
+
+\easysubproblem{What is a confusion table?}\spc{8} \\ 
+A confusion table is a table that describes the performance of a classification model on a set of test data for which the true values are known. Each column represents the instances in a predicted value whereas each row represents the instances in the actual data. 
+
+\newpage
+Consider the following in-sample confusion table where \qu{$>50$K} is the positive class:
+
+\begin{Verbatim}
+       y_hats_train
+y_train <=50K >50K
+  <=50K  3475  262
+  >50K    471  792
+\end{Verbatim}
+
+\easysubproblem{Calculate the following: $n$ (sample size) = $3475 + 262 + 471 + 792 = 5000$ \\~\\
+$FP$ (false positives) = $262$ \\~\\
+$TP$ (true positives) = $792$ \\~\\
+$FN$ (false negatives) = $471$ \\~\\
+$TN$ (true negatives) = $3475$ \\~\\
+$\#P$ (number positive) = $471 + 792 = 1263$\\~\\
+$\#N$ (number negative) = $3475 + 262 = 3737$\\~\\
+$\#PP$ (number predicted positive) = $262 + 792 = 1054$\\~\\
+$\#PN$ (number predicted negative) = $3475 + 471 = 3946$\\~\\
+$\#P / n$ (prevalence / marginal rate / base rate) = $\frac{1263}{5000} = 0.2526$ \\~\\
+$(FP + FN) / n$ (misclassification error) = $ \frac{262 + 471}{5000} = 0.1466$ \\~\\
+$(TP + TN) / n$ (accuracy) = $\frac{792 + 3475}{5000} = 0.8534$ \\~\\
+$TP / \#PP$ (precision) = $\frac{792}{1054} = 0.7514$ \\~\\
+$TP / \#P$ (recall, sensitivity, true positive rate, TPR) = $\frac{792}{1263} = 0.6270$ \\~\\
+$2 / (\text{recall}^{-1} + \text{precision}^{-1})$ (F1 score) = $\frac{2}{(792/1263)^{-1} + (792/ 1054)^{-1}} = \frac{1584}{2317} = 0.6836$ \\~\\
+$FP / \#PP$ (false discovery rate, FDR) = $\frac{262}{1054} = 0.2485$ \\~\\
+$FP / \#N$ (false positive rate, FPR) = $\frac{262}{3737} = 0.0701$ \\~\\ %false alarm rate 
+$FN / \#PN$ (false omission rate, FOR) = $\frac{471}{3946} = 0.1193$ \\~\\
+$FN / \#P$ (false negative rate, FNR) = $\frac{471}{1263} = 0.3729$ %miss rate 
+}
+
+\easysubproblem{Why is FPR also called the \qu{false alarm rate}?}\spc{4} \\
+FPR is also called the false alarm rate because it tells how likely was a $1$ detected even if there was a $0$. 
+
+\easysubproblem{Why is FNR also called the \qu{miss rate}?}\spc{4} \\
+FNR is also called the miss rate because it tells how likely was a $0$ detected when there was a $1$. 
+
+\easysubproblem{Below let the red icons be the positive class and the blue icons be the negative class. 
+
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=1.5in]{precision_recall.jpg}
+\end{figure}
+
+The icons included inside the black border are those that have $\hat{y} = 1$. Compute both precision and recall.}\spc{4} \\
+The confusion table is as follows: $$ \begin{tabular}{c|c|c} 
+& 0 & 1 \\ \hline 
+0 & 13 & 4 \\ \hline 
+1 & 1 & 17 \\ \end{tabular} $$ 
+Then $$ \text{precision} = \frac{TP}{PP} = \frac{17}{21} = 0.8095$$ and $$ \text{recall} = \frac{TP}{P} = \frac{17}{18} = 0.9444$$ 
+
+
+\intermediatesubproblem{There is always a tradeoff of FP vs FN. However, in some situations, you will look at FPR vs. FNR. Describe such a classification scenario. It does not have to be this income amount classification problem, it can be any problem you can think of.}\spc{3} \\
+A situation where it'll be profitable to look at FPR vs. FNR is cancer detection. It will be better to have a good high FPR value and low FNR value. We want people to be wary in the off chance they do in fact have cancer. 
+
+\intermediatesubproblem{There is always a tradeoff of FP vs FN. However, in some situations, you will look at FDR vs. FOR. Describe such a classification scenario. It does not have to be this income amount classification problem, it can be any problem you can think of.}\spc{3} \\ 
+A situation where it'll be profitable to look at FDR vs. FOR is cancer detection. It will be better to have a high FDR value and low FOR value. We want people to be wary that have cancer rather than never finding out. 
+
+\intermediatesubproblem{There is always a tradeoff of FP vs FN. However, in some situations, you will look at precision vs. recall. Describe such a classification scenario. It does not have to be this income amount classification problem, it can be any problem you can think of.}\spc{3} \\ 
+A situation where it'll be profitable to look at precision vs. recall is when doing pattern recognition, such as identifying how people will vote in an upcoming election. We want to know whether people will stick to their political party candidate or switch to the opposing party. 
+
+
+\intermediatesubproblem{There is always a tradeoff of FP vs FN. However, in some situations, you will look only at an overall metric such as accuracy (or $F1$). Describe such a classification scenario. It does not have to be this income amount classification problem, it can be any problem you can think of.}\spc{4} \\
+A situation where it'll be profitable to look at an overall metric such as accuracy is when evaluating the efficiency of an cancer detector. It will be good to have both precision and recall high as possible so that cancer can be properly detected. 
+ 
+\end{enumerate}
+
+
+
+
+
+
+
+\end{document}
+
+\problem{These are questions about Silver's book, chapter 2.}
+
+
+\begin{enumerate}
+
+\intermediatesubproblem{If one's goal is to fit a model for a phenomenon $y$, what is the difference between the approaches of the hedgehog and the fox? Answer using notation from class (i.e. $t ,f, g, h^*, \delta, \epsilon, e, t, z_1, \ldots, z_t, \mathbb{D}, \mathcal{H}, \mathcal{A}, \mathcal{X}, \mathcal{Y}, X, y, n, p, x_{\cdot 1}, \ldots, x_{\cdot p}, x_{1 \cdot}, \ldots, x_{n \cdot}$, etc.). Connecting this to the modeling framework should really make you think about what Tetlock's observation means for political and historical phenomena.}\spc{4}
+
+\easysubproblem{Why did Harry Truman like hedgehogs? Are there a lot of people that think this way?}\spc{4}
+
+
+\hardsubproblem{Why is it that the more education one acquires, the less accurate one's predictions become?}\spc{4}
+
+
+\easysubproblem{Why are probabilistic classifiers (i.e. algorithms that output functions that return probabilities) better than vanilla classifiers (i.e. algorithms that only return the class label)? We will move in this direction in class soon.}\spc{4}
+
+\end{enumerate}
+
+\problem{These are questions about Finlay's book, chapter 2-4. We will hold off on chapter 1 until we cover probability estimation after midterm 2.}
+
+
+\begin{enumerate}
+
+\easysubproblem{What term did we use in class for \qu{behavioral (outome) data}?}\spc{0}
+
+\easysubproblem{Write about some reasons why data scientists implement models that are subpar in predictive performance (p27).}\spc{3}
+
+
+\easysubproblem{In the first wine example, what is the outcome metric and what kind of supervised learning was employed?}\spc{0}
+
+\easysubproblem{In the second wine example, what is the outcome metric and kind of supervised learning was employed?}\spc{0}
+
+
+\easysubproblem{In the third chapter, why is it that some organizations cannot use predictive modeling to improve their business?}\spc{3}
+
+\easysubproblem{In the bankruptcy case, what is the problem with merely using $g$ to obtain a $\hat{y}$ without any other information from the model?}\spc{3}
+
+\easysubproblem{Chapter 3 talks about using the model with human judgment. Under what circumstances is this beneficial? Answer using notation from class (i.e. $t ,f, g, h^*, \delta, \epsilon, e, t$, $z_1, \ldots, z_t, \mathbb{D}, \mathcal{H}, \mathcal{A}, \mathcal{X}, \mathcal{Y}, X, y, n, p, x_{\cdot 1}, \ldots, x_{\cdot p}, x_{1 \cdot}, \ldots, x_{n \cdot}$, etc.).}\spc{3}
+
+
+\hardsubproblem{In Chapter 4 Finaly makes an interesting observation based on his experience in data science. He says most predictive models have $p \leq 30$. Why do you think this is? Discuss.}\spc{5}
+
+
+\easysubproblem{He says there is \qu{almost always other data that could be acquired ... [which] doesn't always come for free}. The \qu{data} he is talking about here specifically means \qu{more predictors} i.e. increasing $p$. In what cases would someone be willing to pay for this data?}\spc{3}
+
+
+\easysubproblem{Table 4 lists \qu{data types} about what type of observations?}\spc{1}
+
+\easysubproblem{What type of data does he find in his experience to be the most important to predictive modeling? Why do you think this is so?}\spc{3}
+
+\easysubproblem{If $x_{\cdot 17}$ was age and $x_{\cdot 18}$ is age of spouse, what is the most likely reason why adding $x_{\cdot 18}$ to $\mathbb{D}$ not be friutful for predictive ability?}\spc{3}
+
+\hardsubproblem{What is the lifespan of a predictive model? Why does it not last forever? Answer using notation from class (i.e. $t ,f, g, h^*, \delta, \epsilon, e, t$, $z_1, \ldots, z_t, \mathbb{D}, \mathcal{H}, \mathcal{A}, \mathcal{X}, \mathcal{Y}, X, y, n, p$, $x_{\cdot 1}, \ldots, x_{\cdot p}, x_{1 \cdot}, \ldots, x_{n \cdot}$, etc.).}\spc{3}
+
+
+\hardsubproblem{What does \qu{large enough to representative of the full population} (p80) mean? Answer using notation from class (i.e. $t ,f, g, h^*, \delta, \epsilon, e, t$, $z_1, \ldots, z_t, \mathbb{D}, \mathcal{H}, \mathcal{A}, \mathcal{X}, \mathcal{Y}, X, y, n, p$, $x_{\cdot 1}, \ldots, x_{\cdot p}, x_{1 \cdot}, \ldots, x_{n \cdot}$, etc.).}\spc{3}
+
+\easysubproblem{Is there a hype about \qu{big data} i.e. including millions of observations instead of a few thousand? Discuss Finlay's opinion.}\spc{3}
+
+
+\easysubproblem{What is Finlay's solution to \qu{overfitting} (p84)?}\spc{5}
+\end{enumerate}
+
+
+\problem{These are questions about association and correlation.}
+
+
+\begin{enumerate}
+
+\easysubproblem{Give an example of two variables that are both correlated and associated by drawing a plot.}\spc{4}
+
+\easysubproblem{Give an example of two variables that are not correlated but are associated by drawing a plot.}\spc{4}
+
+\easysubproblem{Give an example of two variables that are not correlated nor associated by drawing a plot.}\spc{4}
+
+\easysubproblem{Can two variables be correlated but not associated? Explain.}\spc{4}
+
+
+\end{enumerate}
+
+\problem{These are questions about multivariate linear model fitting using the least squares algorithm.}
+
+\begin{enumerate}
+
+\hardsubproblem{Derive $\partialop{\c}{\c^\top A \c}$ where $\c \in \reals^n$ and $A \in \reals^{n \times n}$ but \textit{not} symmetric. Get as far as you can.}\spc{8}
+
+\easysubproblem{Given matrix $X \in \reals^{n \times (p+1)}$, full rank and first column consisting of the $\onevec_n$ vector, rederive the least squares solution $\b$ (the vector of coefficients in the linear model shipped in the prediction function $g$). No need to rederive the facts about vector derivatives.}\spc{10}
+
+\intermediatesubproblem{Consider the case where $p = 1$. Show that the solution for $\b$ you just derived is the same solution that we proved for simple regression in Lecture 8. That is, the first element of $\b$ is the same as $b_0 = \ybar - r \frac{s_y}{s_x}\xbar$ and the second element of $\b$ is $b_1 = r \frac{s_y}{s_x}$.} \spc{10}
+
+\easysubproblem{If $X$ is rank deficient, how can you solve for $\b$? Explain in English.} \spc{2}
+
+\hardsubproblem{Prove $\rank{X} =\rank{X^\top X}$.}\spc{6}
+
+\hardsubproblem{Given matrix $X \in \reals^{n \times (p+1)}$, full rank and first column consisting of the $\onevec_n$ vector, now consider cost multiples (\qu{weights}) $c_1, c_2, \ldots, c_n$ for each mistake $e_i$. As an example, previously the mistake for the 17th observation was $e_{17} := y_{17} - \hat{y}_{17}$ but now it would be $e_{17} := c_{17} (y_{17} - \hat{y}_{17})$.  Derive the weighted least squares solution $\b$. No need to rederive the facts about vector derivatives. Hints: (1) show that SSE is a quadratic form with the matrix $C$ in the middle (2) Split this matrix up into two pieces i.e. $C = C^{\half} C^{\half}$, distribute and then foil (3) note that a scalar value equals its own transpose and (4) use the vector derivative formulas.}\spc{20}
+
+
+\hardsubproblem{If $p=1$, prove $r^2 = R^2$ i.e. the linear correlation is the same as proportion of sample variance explained in a least squares linear model.}\spc{6}
+
+
+\intermediatesubproblem{Prove that the point $<1,\xbar_1, \xbar_2, \ldots, \xbar_p, \bar{y}>$ is a point on the least squares linear solution.}\spc{13}
+
+\end{enumerate}
+
+\problem{These are questions related to the concept of orthogonal projection, QR decomposition and its relationship with least squares linear modeling.}
+
+\begin{enumerate}
+
+\easysubproblem{Consider least squares linear regression using a design matrix $X$ with rank $p + 1$. What are the degrees of freedom in the resulting model? What does this mean?}\spc{3}
+
+
+\intermediatesubproblem{If you are orthogonally projecting the vector $\y$ onto the column space of $X$ which is of rank $p + 1$, derive the formula for $\proj{\colsp{X}}{\y}$. Is this the same as the least squares solution?}\spc{6}
+
+\hardsubproblem{We saw that the perceptron is an \textit{iterative algorithm}. This means that it goes through multiple iterations in order to converge to a closer and closer $\w$. Why not do the same with linear least squares regression? Consider the following. Regress $\y$ using $\X$ to get $\yhat$. This generates residuals $\e$ (the leftover piece of $\y$ that wasn't explained by the regression's fit, $\yhat$). Now try again! Regress $\e$ using $\X$ and then get new residuals $\e_{new}$. Would $\e_{new}$ be closer to $\zerovec_n$ than the first $\e$? That is, wouldn't this yield a better model on iteration \#2? Yes/no and explain.}\spc{10}
+
+
+\intermediatesubproblem{Prove that $Q^\top = Q^{-1}$ where $Q$ is an orthonormal matrix such that $\colsp{Q} = \colsp{X}$ and $Q$ and $X$ are both matrices $\in \reals^{n \times (p+1)}$. Hint: this is purely a linear algebra exercise.}\spc{10}
+
+
+\intermediatesubproblem{Prove that the least squares projection $H = \XXtXinvXt$ is the same as $QQ^\top$.}\spc{10}
+
+\intermediatesubproblem{Prove that an orthogonal projection onto the $\colsp{Q}$ is the same as the sum of the projections onto each column of $Q$.}\spc{10}
+
+
+\hardsubproblem{Trouble in paradise. Prove that the SSE of a multivariate linear least squares model always decreases (equivalently, $R^2$ always increases) upon the addition of a new independent predictor. Keep in mind this holds true even if this new predictor has no information about the true causal inputs to the phenomenon $y$.}\spc{12}
+
+\intermediatesubproblem{Why is this a bad thing? Explain in English.}\spc{3}
+
+
+
+\extracreditsubproblem{Prove that $\rank{H} =\tr{H}$.}\spc{-0.5}
+
+\end{enumerate}
+
+
+\end{document}
